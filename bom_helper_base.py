@@ -1,13 +1,18 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Spyder Editor
+Created on Sat Jul 28 20:02:34 2018
 
-This is a temporary script file.
+refactored for python 2.7
+@author: rebecca
 """
 
+import os
+import urllib
 import json
-import urllib.request as ur
-import urllib.parse as up
+#import urllib.request as ur
+#import urllib.parse as up
+
 
 def bom_helper(orig_mpn):
 #    orig_mpn = input("Part #? ")
@@ -22,20 +27,21 @@ def bom_helper(orig_mpn):
     url1 += "&include[]=short_description"
     
     # urllib.request.urlopen(url) as ll
-    data = ur.urlopen(url1).read()
+    #data = ur.urlopen(url1).read()
+    data = urllib.urlopen(url1).read()
     response = json.loads(data)
     
     #min_quant = 1
     max_results = 10            
-    # print request time (in milliseconds)
-    #print("request time: ", response['msec'], "ms")
-    print("Searching for part %s" % orig_mpn)
-    # print mpn's
+    # #print request time (in milliseconds)
+    ##print("request time: ", response['msec'], "ms")
+    #print("Searching for part %s" % orig_mpn)
+    # #print mpn's
     for result in response['results']:
         avail = 0
         for item in result['items']:
             avail = max(avail,available_from_mouser_digikey(item))
-        print("Available from Mouser or Digi-Key: ",avail)
+        #print("Available from Mouser or Digi-Key: ",avail)
         item = (next(iter(result['items'])))
         if (avail == 0):
             short_descript = item['short_description']
@@ -53,12 +59,12 @@ def bom_helper(orig_mpn):
                 avail = max(avail,available_from_mouser_digikey(new_item))
                 if(avail > min_quant):
                     replacements.append(new_item['mpn'])
-            if(replacements != []):
-                print("Here are replacement parts: ")
-                print(*replacements, sep = "\n")
-            else:
-                print("No suitable replacements found :( but you can search manually:")
-                print(search_args)
+           # if(replacements != []):
+                #print("Here are replacement parts: ")
+                #print(*replacements, sep = "\n")
+            # else:
+                #print("No suitable replacements found :( but you can search manually:")
+                #print(search_args)
     return replacements
 
 def get_part_type(specs):
@@ -72,7 +78,7 @@ def get_part_type(specs):
 def available_from_mouser_digikey(item):
     avail = 0
     for offer in item['offers']:
-#        print(offer['seller']['name'])
+#        #print(offer['seller']['name'])
         if((offer['seller']['name'] == 'Digi-Key') and (offer['in_stock_quantity'] >= min_quant)):
             avail = max(avail,offer['in_stock_quantity'])
         elif ((offer['seller']['name'] == 'Mouser') and (offer['in_stock_quantity'] >= min_quant)):
@@ -104,8 +110,10 @@ def run_parametric_search(search_args):
    ]
     url2 = 'http://octopart.com/api/v3/parts/search?'
     url2 += '&apikey=dfb8e0ac'
-    url2 += '&' + up.urlencode(args)
-    new_data = ur.urlopen(url2).read()
+    url2 += '&' + urllib.urlencode(args)
+    #up.urlencode
+#    new_data = ur.urlopen(url2).read()
+    new_data = urllib.urlopen(url2).read()
     new_response = json.loads(new_data)
     paramsearch_items = []
     for result in new_response['results']:
@@ -113,73 +121,3 @@ def run_parametric_search(search_args):
         paramsearch_items.append(item)
     return paramsearch_items
 
-
-
-
-            
-
-#%%
-#        print("%s - %s" % (item['brand']['name'], item['mpn']))
-                    
-#            for seller in offers['seller']:
-#                print(seller['name'])
-#            print(offers['in_stock_quantity'])
-#        if 'lifecycle_status' in item['specs']:
-#            lifecycle_status = item['specs']['lifecycle_status']['value'][0]
-#        else:
-#            lifecycle_status = 'Unknown'
-#        brand_name = item['brand']['name']
-#        mpn = item['mpn']
-#        
-#        print("\t%s %s: %s, In stock: %d" % (brand_name, mpn, lifecycle_status,instock))
-#
-#        for offers in item['offers']:
-#            print(offers['in_stock_quantity'])
-
-## print mpn's
-#for result in response['results']:
-#    print("Reference: %s" % result['reference'])
-#    for item in result['items']:
-#        # get lifecycle status
-#        if 'lifecycle_status' in item['specs']:
-#            lifecycle_status = item['specs']['lifecycle_status']['value'][0]
-#        else:
-#            lifecycle_status = 'Unknown'
-#
-#        brand_name = item['brand']['name']
-#        mpn = item['mpn']
-#        print("\t%s %s: %s" % (brand_name, mpn, lifecycle_status))
-    #    print(sellers)
-#    if (('Mouser' or 'Digikey') in sellers) and (offers['in_stock_quantity'] > 0):
-#        return offers['in_stock_quantity'] 
-#    else: return 0
-            #%%
-#caps: ['capacitance','display_value',]
-#key1 = next(iter(specs.keys())
-            #        url2 += '&' + up.urlencode(search_args)
-#        new_data = ur.urlopen(url2).read()
-#        new_response = json.loads(new_data)
-#        for result in new_response['results']:
-#           item = result['item']
-#           print("%s - %s" % (item['brand']['name'], item['mpn']))
-        
-#        if(available_from_mouser_digikey(item) > 0):
-#            print('yay!')
-#            specs = item['specs']
-#            
-#        else:
-#            print('Part not available from Mouser or Digikey')
-#            short_descript = item['short_description']
-#            specs = item['specs']
-##        
-#        sellers = []
-#        for offers in item['offers']:
-#            sellers.append(offers['seller']['name'])
-#        if (('Mouser' or 'Digikey') in sellers) and (offers['in_stock_quantity'] > 0):
-#            print('yep')
-#        else:
-#            print('Part not available from Mouser or Digikey')
-#            short_descript = item['short_description']
-#            specs = item['specs']
-#            print(short_descript) 
-# %%
