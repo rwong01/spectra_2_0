@@ -1,0 +1,9 @@
+MPN --> 
+status (active, eol/obsolete?) --> 
+found in database?
+	if active, [quantity] = available? 
+	else get MPN info (part specs)
+	search for parts by specs, available in [quantity]
+	return top hit + 2 more?
+else 
+	return not found
